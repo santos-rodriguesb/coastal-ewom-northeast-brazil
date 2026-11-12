@@ -1,0 +1,8 @@
+pandas
+numpy
+nltk
+gensim
+LeIA
+scikit-learn
+statsmodels
+estimatr
