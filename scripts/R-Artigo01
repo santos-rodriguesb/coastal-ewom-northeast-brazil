@@ -1,6 +1,6 @@
 # ==============================================================================
-# SCRIPT COMPLETO: ANÁLISES R (ARTIGO 1)
-# DISSERTAÇÃO BRENO DOS SANTOS RODRIGUES (2026) - UFPR
+# SCRIPT COMPLETO: ANÁLISES R E ECONOMETRIA (ARTIGO DE ADMINISTRAÇÃO / ARTIGO 1)
+# AUTOR: BRENO DOS SANTOS RODRIGUES (2026) - UFPR
 # ==============================================================================
 
 # 1. CARREGAR BIBLIOTECAS
@@ -12,10 +12,11 @@ library(writexl)
 library(car)
 library(lmtest)
 library(nortest)
+library(estimatr) # Essencial para erros-padrão robustos HC3
 
 # 2. CARREGAR DADOS
-# Substitua pelo seu caminho real: ex: "C:/Users/Breno/OneDrive/dados_nordeste.xlsx"
-caminho_banco <- "CAMINHO_DO_SEU_BANCO" 
+# Ajuste para o caminho do seu arquivo de dados processados
+caminho_banco <- "dados_nordeste_processado.xlsx" 
 df <- read_excel(caminho_banco)
 
 # 3. PRÉ-PROCESSAMENTO E CRIAÇÃO DE VARIÁVEIS
@@ -48,7 +49,7 @@ df$review_date <- as.Date(parse_date_time(str_trim(str_replace(df$review_date, "
 df$owner_response_date_final <- as.Date(parse_date_time(str_trim(str_replace(df$owner_response_date, "Feita em ", "")), orders = c("d B Y", "dmy", "ymd"), locale = "pt_BR", truncated = 3))
 df$has_owner_response <- !is.na(df$owner_response) & df$owner_response != ""
 
-# Variáveis do Artigo 1
+# Variáveis do Estudo
 df$review_text_clean <- str_remove_all(str_remove_all(str_remove_all(tolower(df$review_text), "http[s]?://\\S+"), "[[:punct:]]"), "[[:digit:]]")
 df$Length_of_review <- str_count(df$review_text_clean, "\\w+")
 df$Review_Freshness <- as.numeric(difftime(max(df$review_date, na.rm = TRUE), df$review_date, units = "days"))
@@ -59,22 +60,24 @@ df$owner_response_freshness[df$owner_response_freshness < 0] <- NA
 # 4. ANÁLISE DESCRITIVA E TESTES PRELIMINARES
 summary(df[, c("review_rating", "Length_of_review", "num_fotos", "Review_Freshness", "User_Activity_in_Sample", "owner_response_freshness")])
 
-# 5. MODELO DE REGRESSÃO (ARTIGO 1)
-modelo <- lm(review_rating ~ Length_of_review + num_fotos + Review_Freshness + 
-             User_Activity_in_Sample + has_owner_response + Cidade, data = df)
-summary(modelo)
+# 5. MODELO DE REGRESSÃO COM ERROS-PADRÃO ROBUSTOS (HC3)
+# Utiliza lm_robust do pacote estimatr para garantir robustez contra heteroscedasticidade
+modelo_robust <- lm_robust(review_rating ~ Length_of_review + num_fotos + Review_Freshness + 
+                             User_Activity_in_Sample + has_owner_response + Cidade, 
+                           data = df, se_type = "HC3")
+summary(modelo_robust)
 
-# 6. TESTES DE ROBUSTEZ
-vif(modelo)
-bptest(modelo)
-residuos <- residuals(modelo)[!is.na(residuals(modelo))]
-if (length(residuos) <= 5000) lillie.test(residuos)
+# 6. TESTES DE ROBUSTEZ ADICIONAIS
+modelo_padrao <- lm(review_rating ~ Length_of_review + num_fotos + Review_Freshness + 
+                      User_Activity_in_Sample + has_owner_response + Cidade, data = df)
+vif(modelo_padrao)
+bptest(modelo_padrao)
 
-# 7. TESTE QUI-QUADRADO (SILÊNCIO GERENCIAL - Tabela 6)
+# 7. TESTE QUI-QUADRADO (SILÊNCIO GERENCIAL)
 df$perfil_eWOM <- cut(df$review_rating, breaks = c(0, 2.5, 3.5, 5.1), labels = c("Detratores", "Neutros", "Promotores"))
 tabela_contigencia <- table(df$perfil_eWOM, df$has_owner_response)
 chisq.test(tabela_contigencia)
 print(round(prop.table(tabela_contigencia, margin = 1) * 100, 2))
 
-# 8. EXPORTAÇÃO
-write_xlsx(df, "resultado_processado_dissertacao.xlsx")
+# 8. EXPORTAÇÃO (Opcional)
+# write_xlsx(df, "resultado_processado_dissertacao.xlsx")
