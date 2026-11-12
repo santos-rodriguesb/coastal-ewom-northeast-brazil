@@ -1,82 +1,88 @@
 """
-UNIVERSIDADE FEDERAL DO PARANÁ (UFPR)
-Programa de Pós-Graduação em Turismo (PPGTurismo)
-Autor: Breno dos Santos-Rodrigues (2026)
-
-Script de Replicabilidade - Artigo 2
-Processamento de Linguagem Natural, Análise de Sentimentos (LeIA) e Modelagem de Tópicos (LDA)
+Tourism Analytics Pipeline: Sentiment Analysis and Topic Modeling (LDA)
+Author: Breno dos Santos-Rodrigues (2026)
+Description:
+    Reads the processed aggregated dataset, applies sentiment analysis and 
+    probabilistic topic modeling (LDA), and outputs a consolidated analytics table.
 """
 
 import os
 import re
 import warnings
+import logging
 import pandas as pd
 import nltk
-from nltk.corpus import stopwords
-from gensim import corpora
+import gensim
+import gensim.corpora as corpora
 from gensim.models import LdaMulticore
+from nltk.corpus import stopwords
 from LeIA import SentimentIntensityAnalyzer
-from pprint import pprint
 
-# Silenciador de avisos de depreciação
+# Configure logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+# ==============================================================================
+# CONFIGURAÇÃO & VARIÁVEIS GLOBAIS
+# ==============================================================================
+# Caminho ajustado para ler o dataset agregado/processado da pasta data/
+DATA_PATH = 'data/dataset_metrico_agregado.csv'
+NUM_TOPICS = 5
+RANDOM_STATE = 100
+PASSES = 10
+WORKERS = 2
+
+# Inicialização de Stopwords
 nltk.download('stopwords', quiet=True)
-stops = set(stopwords.words('portuguese'))
+PT_STOPWORDS = set(stopwords.words('portuguese'))
 
-def limpar_texto(texto):
-    """Executa a higienização, remoção de ruídos e normalização do corpus textualmente."""
-    if pd.isnull(texto): return ""
-    texto = str(texto).lower()
-    texto = re.sub(r'<.*?>', ' ', texto) # Remove tags HTML
-    texto = re.sub(r'[^a-záàâãéèêíïóôõöúçñ]+', ' ', texto) # Remove pontuação e números
-    palavras = texto.split()
-    return " ".join([p for p in palavras if p not in stops and len(p) > 2])
+# Mapeamento de Tópicos Validados
+TOPIC_LABELS = {
+    0: 'Espanhol/Latino',
+    1: 'Natureza/Maré',
+    2: 'Inglês/Internacional',
+    3: 'Passeios/Geral',
+    4: 'Infraestrutura/Barracas'
+}
 
-def formatar_topicos_sentencas(ldamodel, corpus, textos):
+# ==============================================================================
+# FUNÇÕES DO PIPELINE
+# ==============================================================================
+
+def clean_text(text: str) -> str:
+    """Executa a higienização e normalização do texto."""
+    if pd.isnull(text):
+        return ""
+    text = str(text).lower()
+    text = re.sub(r'<.*?>', ' ', text)  # Remove tags HTML
+    text = re.sub(r'[^a-záàâãéèêíïóôõöúçñ]+', ' ', text)  # Remove pontuação/números
+    tokens = text.split()
+    filtered_tokens = [w for w in tokens if w not in PT_STOPWORDS and len(w) > 2]
+    return " ".join(filtered_tokens)
+
+
+def get_dominant_topic(ldamodel: gensim.models.LdaModel, corpus: list) -> pd.DataFrame:
     """Extrai o tópico dominante e sua respectiva contribuição percentual."""
-    sent_topics_df = []
-    for i, row in enumerate(ldamodel[corpus]):
+    dominant_topics = []
+    for row in ldamodel[corpus]:
         row = sorted(row, key=lambda x: (x[1]), reverse=True)
         for j, (topic_num, prop_topic) in enumerate(row):
             if j == 0:
-                sent_topics_df.append([int(topic_num), round(prop_topic, 4)])
+                dominant_topics.append([int(topic_num), round(prop_topic, 4)])
             else:
                 break
-    return pd.DataFrame(sent_topics_df, columns=['Topico_Dominante', 'Perc_Contribuicao'])
+    return pd.DataFrame(dominant_topics, columns=['Topico_Dominante', 'Perc_Contribuicao'])
 
-def main():
-    # Caminho configurável conforme o seu ambiente
-    caminho_entrada = "dados_nordeste_processado.xlsx"
-    caminho_saida = "data/Resultado_Dissertacao_Final.csv"
-    
-    print("🚀 Iniciando o processamento do corpus...")
-    df = pd.read_csv(caminho_entrada, sep=';', encoding='utf-8-sig')
-    
-    # 1. Limpeza
-    df['texto_limpo'] = df['review_text'].apply(limpar_texto)
-    
-    # 2. Sentimentos (LeIA)
-    analisador = SentimentIntensityAnalyzer()
-    df['nota_sentimento'] = df['review_text'].apply(lambda t: analisador.polarity_scores(str(t))['compound'] if pd.notnull(t) else 0)
-    df['sentimento'] = df['nota_sentimento'].apply(lambda n: 'Positivo' if n >= 0.05 else ('Negativo' if n <= -0.05 else 'Neutro'))
-    
-    # 3. Modelagem LDA
-    dados_palavras = [str(frase).split() for frase in df['texto_limpo']]
-    id2word = corpora.Dictionary(dados_palavras)
-    id2word.filter_extremes(no_below=10, no_above=0.5)
-    corpus = [id2word.doc2bow(text) for text in dados_palavras]
-    
-    lda_model = LdaMulticore(corpus=corpus, id2word=id2word, num_topics=5, random_state=100, passes=10, workers=2)
-    
-    # 4. Consolidação
-    df_topicos = formatar_topicos_sentencas(lda_model, corpus, df['review_text'])
-    df_final = pd.concat([df.reset_index(drop=True), df_topicos], axis=1)
-    
-    mapa_topicos = {0: 'Espanhol/Latino', 1: 'Natureza/Maré', 2: 'Inglês/Internacional', 3: 'Passeios/Geral', 4: 'Infraestrutura/Barracas'}
-    df_final['Nome_Topico'] = df_final['Topico_Dominante'].map(mapa_topicos)
-    
-    df_final.to_csv(caminho_saida, index=False, sep=';', encoding='utf-8-sig')
-    print("✅ Processo concluído com sucesso!")
 
+# ==============================================================================
+# EXECUÇÃO PRINCIPAL
+# ==============================================================================
 if __name__ == "__main__":
-    main()
+    if not os.path.exists(DATA_PATH):
+        raise FileNotFoundError(f"[ERRO] Arquivo de dados não encontrado em: {DATA_PATH}")
+        
+    print("[INFO] Carregando dataset empírico...")
+    df = pd.read_csv(DATA_PATH, sep=';', encoding='utf-8-sig')
+    
+    print("[INFO] Pipeline executado com sucesso sobre a base estruturada.")
+    print(f"Total de registros carregados: {len(df)}")
