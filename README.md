@@ -2,15 +2,14 @@
 
 This repository contains the replication code and processed aggregated dataset for empirical analyses investigating User-Generated Content (UGC), electronic Word-of-Mouth (eWOM), and managerial accountability in coastal tourist destinations in Northeast Brazil.
 
-This work supports the study:
-> **Relationship Strategy and Digital Accountability: eWOM in Coastal Tourism**  
-> *Breno dos Santos-Rodrigues & André Riani Costa Perinotto* (2026)
+This work supports the research developed by:
+> **Breno dos Santos-Rodrigues, André Riani Costa Perinotto & Melise de Lima Pereira** (2026)
 
 ## Repository Structure
 
 - `data/`: Contains the processed and aggregated dataset (`dataset_metrico_agregado.csv`) used to run the statistical models and NLP pipeline, preserving the confidentiality of the raw corpus texts in compliance with open science and platform guidelines.
 - `scripts/`: 
-  - `01_econometric_hc3_and_chisq.R`: R script executing robust multiple linear regression (HC3 standard errors via `estimatr`) and Chi-Square contingency tests for managerial silence.
+  - `01_econometric_hc3_and_chisq.R`: R script executing robust multiple linear regression (HC3 robust standard errors via `estimatr`) and Chi-Square contingency tests for managerial silence.
   - `02_nlp_lda_leia_pipeline.py`: Python script executing lexical sentiment intensity analysis (LeIA) and Latent Dirichlet Allocation (LDA) probabilistic topic modeling.
 - `requirements.txt`: Python dependencies required to reproduce the computational environment.
 - `LICENSE`: Open-source licensing terms.
@@ -30,7 +29,7 @@ To install the required Python libraries, run the following command in your term
 ## Citation
 If you use these scripts or data in your research, please cite the Master's dissertation:
 
-> Rodrigues, B. dos S. (2026). *A experiência turística como preditor da fidelização em destinos costeiros: uma abordagem multimétodo de avaliações online*. Dissertação de Mestrado, Programa de Pós-Graduação em Turismo, Universidade Federal do Paraná (UFPR), Curitiba.
+> Rodrigues, B. dos S. (2026). *A experiência turística como preditor da fidelização em destinos costeiros: uma abordagem multimétodo de avaliações online*. Dissertação de Mestrado, Programa de Pós-Graduação em Turismo, Universidade Federal do Paraná (UFPR), Curitiba. (Orientação: André R. C. Perinotto; Coorientação: Melise de L. Pereira).
 
 ## License
 This project is licensed under the terms of the [MIT License](LICENSE).
