@@ -1,3 +1,4 @@
+```markdown
 # coastal-ewom-northeast-brazil
 
 This repository contains the replication code and processed dataset for empirical analyses investigating User-Generated Content (UGC), electronic Word-of-Mouth (eWOM), and tourist loyalty in coastal tourist destinations in Northeast Brazil.
@@ -22,25 +23,18 @@ This work supports the Master's dissertation:
 ## Requirements and Reproducibility
 
 ### R Environment
-To install the required R packages for Study 1, run the following command in your R console:
+To install the required R packages, run the following command in your R console:
 
     install.packages(c("readxl", "stringr", "lubridate", "dplyr", "writexl", "car", "lmtest", "nortest", "estimatr"))
 
 ### Python Environment
-To install the required Python libraries for Study 2, run the following command in your terminal:
+To install the required Python libraries, run the following command in your terminal:
 
     pip install -r requirements.txt
 
 ## Citation
-If you use these scripts or data in your research, please cite:
+## Citation
 
-    @mastersthesis{rodrigues2026experiencia,
-      author  = {Rodrigues, Breno dos Santos},
-      title   = {A experi{\^e}ncia tur{\'i}stica como preditor da fideliza{\c{c}}{\~a}o em destinos tur{\'i}sticos costeiros: uma abordagem multim{\'e}todo de avalia{\c{c}}{\~o}es online},
-      school  = {Universidade Federal do Paran{\'a} (UFPR)},
-      year    = {2026},
-      address = {Curitiba, PR, Brazil}
-    }
+If you use these scripts or data in your research, please cite the Master's dissertation:
 
-## License
-This project is licensed under the terms of the [MIT License](LICENSE).
+> Rodrigues, B. dos S. (2026). *A experiência turística como preditor da fidelização em destinos costeiros: uma abordagem multimétodo de avaliações online*. Dissertação de Mestrado, Programa de Pós-Graduação em Turismo, Universidade Federal do Paraná (UFPR), Curitiba.
