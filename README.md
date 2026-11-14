@@ -1,23 +1,18 @@
-```markdown
-# coastal-ewom-northeast-brazil
+# Coastal eWOM and Digital Accountability in Northeast Brazil
 
-This repository contains the replication code and processed dataset for empirical analyses investigating User-Generated Content (UGC), electronic Word-of-Mouth (eWOM), and tourist loyalty in coastal tourist destinations in Northeast Brazil.
+This repository contains the replication code and processed aggregated dataset for empirical analyses investigating User-Generated Content (UGC), electronic Word-of-Mouth (eWOM), and managerial accountability in coastal tourist destinations in Northeast Brazil.
 
-This work supports the Master's dissertation:
-> **A experiência turística como preditor da fidelização em destinos turísticos costeiros: uma abordagem multimétodo de avaliações online**  
-> *Breno dos Santos-Rodrigues* (2026)  
-> *Universidade Federal do Paraná (UFPR)*
+This work supports the study:
+> **Relationship Strategy and Digital Accountability: eWOM in Coastal Tourism**  
+> *Breno dos Santos-Rodrigues & André Riani Costa Perinotto* (2026)
 
 ## Repository Structure
 
-- `data/`: Contains the primary structured TripAdvisor dataset (`dados_nordeste.xlsx`, $N = 24,638$) covering coastal destinations across all nine states of Northeast Brazil (2011–2025).
-
-- `scripts/`:  
-  - `01_econometric_analysis_study1.R`: R script executing data cleaning, feature engineering, multiple linear regression with HC3 robust standard errors (`estimatr`), and Chi-Square contingency tests for managerial silence.  
-  - `02_nlp_lda_leia_study2.py`: Python script executing text preprocessing, LeIA lexical sentiment analysis, and Latent Dirichlet Allocation (LDA) probabilistic topic modeling.
-
+- `data/`: Contains the processed and aggregated dataset (`dataset_metrico_agregado.csv`) used to run the statistical models and NLP pipeline, preserving the confidentiality of the raw corpus texts in compliance with open science and platform guidelines.
+- `scripts/`: 
+  - `01_econometric_hc3_and_chisq.R`: R script executing robust multiple linear regression (HC3 standard errors via `estimatr`) and Chi-Square contingency tests for managerial silence.
+  - `02_nlp_lda_leia_pipeline.py`: Python script executing lexical sentiment intensity analysis (LeIA) and Latent Dirichlet Allocation (LDA) probabilistic topic modeling.
 - `requirements.txt`: Python dependencies required to reproduce the computational environment.
-
 - `LICENSE`: Open-source licensing terms.
 
 ## Requirements and Reproducibility
@@ -33,8 +28,9 @@ To install the required Python libraries, run the following command in your term
     pip install -r requirements.txt
 
 ## Citation
-## Citation
-
 If you use these scripts or data in your research, please cite the Master's dissertation:
 
 > Rodrigues, B. dos S. (2026). *A experiência turística como preditor da fidelização em destinos costeiros: uma abordagem multimétodo de avaliações online*. Dissertação de Mestrado, Programa de Pós-Graduação em Turismo, Universidade Federal do Paraná (UFPR), Curitiba.
+
+## License
+This project is licensed under the terms of the [MIT License](LICENSE).
